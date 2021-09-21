@@ -6,10 +6,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SecretSanta.Web.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 
 namespace SecretSanta.Web
 {
@@ -29,6 +31,11 @@ namespace SecretSanta.Web
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+
+            services.AddDbContext<Core.Domain.Contexts.SantaContext>(options =>
+               options.UseSqlServer(Configuration.GetConnectionString("SantaContext")));
+
+            services.AddMediatR(typeof(Core.Queries.FetchWhoPersonPicked));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
