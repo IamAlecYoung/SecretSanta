@@ -57,6 +57,6 @@ jobs:
           local: ${{env.DOTNET_ROOT}}/SecretSanta
           remote: /var/www/SecretSanta
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          username: ${{ secrets.SSH_USERNAME }}
           privateKey: ${{ secrets.SSH_KEY }}
             
