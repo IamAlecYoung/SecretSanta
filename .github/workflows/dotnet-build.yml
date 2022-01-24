@@ -47,8 +47,8 @@ jobs:
         with:
           name: .net-app
 
-      - name: Make sure folder exists
-        run: mkdir /var/www/SecretSanta
+      #- name: Make sure folder exists
+      #  run: mkdir /var/www/SecretSanta
 
       - name: Deploy to Server using SSH
         uses: garygrossgarten/github-action-scp@v0.5.3
