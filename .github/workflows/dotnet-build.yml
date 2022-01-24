@@ -40,7 +40,6 @@ jobs:
     needs: build
     environment:
       name: 'Development'
-      url: ${{ secrets.SSH_HOST }}
 
     steps:
       - name: Download artifact from build job
