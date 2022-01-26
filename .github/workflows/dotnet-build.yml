@@ -47,8 +47,8 @@ jobs:
         with:
           name: .net-app
 
-      - name: Make sure folder exists
-        run: mkdir ${{ secrets.SSH_DIRECTORY }}/SecretSanta
+      #- name: Make sure folder exists
+      #  run: mkdir ${{ secrets.SSH_DIRECTORY }}/SecretSanta
 
       - name: Deploy to Server using SSH
         uses: easingthemes/ssh-deploy@main
