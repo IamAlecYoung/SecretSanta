@@ -47,15 +47,14 @@ jobs:
         with:
           name: .net-app
 
-      #- name: Make sure folder exists
-      #  run: mkdir /var/www/html/netcorepublish/SecretSanta
+      - name: Make sure folder exists
+        run: mkdir ${{ secrets.SSH_DIRECTORY }}/SecretSanta
 
       - name: Deploy to Server using SSH
-        uses: garygrossgarten/github-action-scp@v0.5.3
-        with:
-          local: ${{env.DOTNET_ROOT}}/SecretSanta
-          remote: /var/www/html/netcorepublish/SecretSanta
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          privateKey: ${{ secrets.SSH_KEY }}
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          TARGET: ${{ secrets.SSH_DIRECTORY }}/SecretSanta
             
