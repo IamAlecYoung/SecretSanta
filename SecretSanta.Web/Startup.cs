@@ -51,6 +51,19 @@ namespace SecretSanta.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
+            // Base directory
+            app.UsePathBase("/SecretSanta");
+            app.Use((context, next) =>
+            {
+                context.Request.PathBase = "/SecretSanta";
+                return next();
+            });
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
