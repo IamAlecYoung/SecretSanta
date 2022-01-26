@@ -47,7 +47,7 @@ jobs:
         with:
           name: .net-app
 
-      #- name: Make sure folder exists 
+      #- name: Make sure folder exists
       #  run: mkdir ${{ secrets.SSH_DIRECTORY }}/SecretSanta
 
       - name: Deploy to Server using SSH
