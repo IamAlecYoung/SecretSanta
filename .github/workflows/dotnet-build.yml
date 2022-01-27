@@ -47,9 +47,6 @@ jobs:
         with:
           name: .net-app
 
-      #- name: Make sure folder exists
-      #  run: mkdir ${{ secrets.SSH_DIRECTORY }}/SecretSanta
-
       - name: Deploy to Server using SSH
         uses: easingthemes/ssh-deploy@main
         env:
@@ -58,4 +55,12 @@ jobs:
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_USER: ${{ secrets.SSH_USERNAME }}
           TARGET: ${{ secrets.SSH_DIRECTORY }}/SecretSanta
-            
+      
+      - name: Restart service using SSH
+        uses: garygrossgarten/github-action-ssh@v0.6.3
+        with:
+          host: ${{secrets.SSH_HOST}}
+          username: ${{secrets.SSH_USERNAME}}
+          privateKey: ${{secrets.SSH_KEY}} 
+          command: 
+            sudo systemctl restart secretsanta.service
