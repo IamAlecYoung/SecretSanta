@@ -19,6 +19,13 @@ jobs:
     
     - name: Restore dependencies
       run: dotnet restore
+      
+    - name: Edit a .NET Core database connection string in appsettings.json
+      uses: benday-inc/edit-dbconnstr-in-appsettings@v1.2
+      with:
+        name: "SantaContext"
+        connectionString: ${{secrets.SQL_CONNECTION}}
+        pathToSettingsFile: '${{ github.workspace }}/SecretSanta.Web/appsettings.json'
     
     - name: Build
       run: dotnet build --no-restore
@@ -64,3 +71,6 @@ jobs:
           privateKey: ${{secrets.SSH_KEY}} 
           command: 
             sudo systemctl restart secretsanta.service
+
+
+SQL_CONNECTION
