@@ -11,6 +11,9 @@
 
 Test Github actions change to restart service after a successful deploy
 
+<p>SQL success: @SQLSuccess</p>
+<p>@SQLException</p>
+
 <div style="border-left: 3px solid green; padding-left: 10px;">
     @if(peep != null)
     {
@@ -32,6 +35,7 @@ Test Github actions change to restart service after a successful deploy
 @code {
     private whopickedwho peep;
     private bool SQLSuccess = true;
+    private string SQLException;
     private whopickedwho WhoPicked;
     
     protected override void OnParametersSet()
@@ -55,6 +59,7 @@ Test Github actions change to restart service after a successful deploy
         {
             var except = ex.Message;
             SQLSuccess = false;
+            SQLException = ex.Message;
         }
 
 

@@ -20,11 +20,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       
-    - name: Edit a .NET Core database connection string in appsettings.json
+    - name: Update database connection string in appsettings.json
       uses: benday-inc/edit-dbconnstr-in-appsettings@v1.2
       with:
-        name: SantaContext
-        connectionString: ${{secrets.SQL_CONNECTION}}
+        name: 'SantaContext'
+        connectionString: '${{ secrets.SQL_CONNECTION }}'
         pathToSettingsFile: '${{ github.workspace }}/SecretSanta.Web/appsettings.json'
     
     - name: Build
