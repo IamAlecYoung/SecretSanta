@@ -1,5 +1,32 @@
-﻿@page "/"
+﻿@using MediatR
+@inject IMediator _mediatr
+
+@page "/"
 
 <h1>Hello, world!</h1>
 
 Test Github actions change to restart service after a successful deploy
+
+@if(peep != null)
+{
+    <p>Pickee: @peep.Person1</p>
+    <p>Picker: @peep.Person2</p>
+}
+
+@code {
+    private Core.Domain.whopickedwho peep;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        var thingy = _mediatr.Send(new Core.Queries.FetchWhoPersonPicked.Query {
+            PersonId = 12
+        }).Result;
+
+        if(thingy.Success)
+        {
+            peep = thingy.picked;
+        }
+    }
+}

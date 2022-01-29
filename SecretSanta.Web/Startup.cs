@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Hosting;
 using SecretSanta.Web.Data;
 using Microsoft.EntityFrameworkCore;
+using MySql.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace SecretSanta.Web
             services.AddSingleton<WeatherForecastService>();
 
             services.AddDbContext<Core.Domain.Contexts.SantaContext>(options =>
-               options.UseSqlServer(Configuration.GetConnectionString("SantaContext")));
+               options.UseMySQL(Configuration.GetConnectionString("SantaContext")));
 
             services.AddMediatR(typeof(Core.Queries.FetchWhoPersonPicked));
         }

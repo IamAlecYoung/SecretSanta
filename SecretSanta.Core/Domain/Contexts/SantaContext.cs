@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using MySql.EntityFrameworkCore;
+    
 namespace SecretSanta.Core.Domain.Contexts
 {
     public class SantaContext : DbContext
@@ -24,8 +25,9 @@ namespace SecretSanta.Core.Domain.Contexts
                 .HasKey(c => new { c.Person1, c.Person2});
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-        }
+        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        // {
+        //     optionsBuilder.UseMySQL("");
+        // }
     }
 }
