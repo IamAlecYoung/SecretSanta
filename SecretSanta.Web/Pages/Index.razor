@@ -1,7 +1,9 @@
 ﻿@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using SecretSanta.Core.Domain
+@using SecretSanta.Core.Domain.Contexts
 @inject IMediator _mediatr
+@inject SantaContext _dbContext;
 
 @page "/"
 
@@ -9,17 +11,19 @@
 
 Test Github actions change to restart service after a successful deploy
 
-<div>
+<div style="border-left: 3px solid green; padding-left: 10px;">
     @if(peep != null)
     {
+        <p>Mediatr</p>
         <p>Pickee: @peep.Person1</p>
         <p>Picker: @peep.Person2</p>
     }
 </div>
 
-<div>
+<div style="border-left: 3px solid blue; padding-left: 10px;">
     @if(WhoPicked != null)
     {
+        <p>Straight DB</p>
         <p>Pickee: @WhoPicked.Person1</p>
         <p>Picker: @WhoPicked.Person2</p>
     }
@@ -36,13 +40,16 @@ Test Github actions change to restart service after a successful deploy
 
         try
         {
-            using (var db = new Core.Domain.Contexts.SantaContext())
-            {
-                WhoPicked = db.WhoPickedWho
+            //using (var db = new Core.Domain.Contexts.SantaContext())
+            // using (var db = new _dbContext)
+            // {
+                _dbContext.Database.CanConnect();
+                
+                WhoPicked = _dbContext.WhoPickedWho
                     .Where(q => q.Person1 == 12)
                     .AsNoTracking()
                     .FirstOrDefault();
-            }
+            // }
         } 
         catch (Exception ex)
         {

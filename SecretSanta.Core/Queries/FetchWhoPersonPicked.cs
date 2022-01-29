@@ -39,7 +39,7 @@ namespace SecretSanta.Core.Queries
                             .AsNoTracking()
                             .FirstOrDefault();
 
-                        if (recds == null)
+                        if (recds != null)
                         {
                             result.Success = true;
                             result.picked = recds;

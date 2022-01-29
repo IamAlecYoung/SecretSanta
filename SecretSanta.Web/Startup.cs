@@ -37,6 +37,7 @@ namespace SecretSanta.Web
             services.AddDbContext<Core.Domain.Contexts.SantaContext>(options =>
                options.UseMySQL(Configuration.GetConnectionString("SantaContext")));
 
+            services.AddMediatR(typeof(Startup));
             services.AddMediatR(typeof(Core.Queries.FetchWhoPersonPicked));
         }
 
