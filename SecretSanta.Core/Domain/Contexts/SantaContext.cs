@@ -33,10 +33,15 @@ namespace SecretSanta.Core.Domain.Contexts
         {
             if(_config == null)
             {
+                var StringPath = string.Empty;
+                #if DEBUG
+                    StringPath = ".Web";
+                #endif
+                
                 _config 
                     = new ConfigurationBuilder()
                         .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile(@Directory.GetCurrentDirectory() + "/../SecretSanta.Web/appsettings.json")
+                        .AddJsonFile(@Directory.GetCurrentDirectory() + $"/../SecretSanta{StringPath}/appsettings.json")
                         .Build();
             }
             if(_config != null)
