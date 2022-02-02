@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MediatR;
 using System.Threading.Tasks;
 using SecretSanta.Core.Domain;
@@ -10,18 +9,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SecretSanta.Core.Queries
 {
-    public class FetchWhoPersonPicked
+    public class FetchAllPeeps
     {
         public class Query : IRequest<Result>
         {
-            public int PersonId { get; set; }
+            public string Year { get; set; }
+            public bool Randomise { get; set; }
         }
 
         public class Result
         {
             public bool Success { get; set; }
             public string Exception { get; set; }
-            public Peeps picked { get; set; }
+            public List<Peeps> Peeps { get; set; }
         }
 
         public class QueryHandler : IRequestHandler<Query, Result>
@@ -29,27 +29,23 @@ namespace SecretSanta.Core.Queries
             public Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var result = new Result { Success = false };
-
+                
                 try
                 {
                     using (var db = new Domain.Contexts.SantaContext())
                     {
-                        var recds = 
-                            db.Peeps 
-                                .Where(e 
-                                    => db.WhoPickedWho
-                                        .Where(f => f.Person1 == request.PersonId)
-                                        .Select(s => s.Person2)
-                                        .FirstOrDefault() == e.ID)
-                            .AsNoTracking()
-                            .FirstOrDefault();
-
-                        //SELECT * from `peeps` WHERE `ID` = (SELECT Person2 FROM whopickedwho WHERE Person1 = :whoPicked)");
+                        // Find a random result within the current year
+                        var records = db.Peeps
+                            .Where((q => q.Year == request.Year))
+                            .AsNoTracking();
                         
-                        if (recds != null)
+                        if (records != null)
                         {
+                            if(request.Randomise)
+                                records = records.OrderBy(r => Guid.NewGuid()); // Retrieve a random result
+                            
                             result.Success = true;
-                            result.picked = recds;
+                            result.Peeps = records.ToList();
                         }
                     }
                 } 

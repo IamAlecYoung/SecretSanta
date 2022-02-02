@@ -1,0 +1,97 @@
+﻿@using MediatR
+@* //@using Microsoft.EntityFrameworkCore *@
+@using SecretSanta.Core.Domain
+@* @using SecretSanta.Core.Domain.Contexts *@
+@inject IMediator _mediatr
+@inject NavigationManager _navigationManager
+
+@page "/Chosen/{UserId:int}"
+
+<div class="jumbotron pt-4">
+    
+    <div class="row">
+        <div class="col-6 offset-3">
+        <div class="justify-content-between">
+            <h2 class="display-4 d-inline-block">
+                <i><img src="./pics/emoji/grinning.svg" height="64" alt="Grinning icon"/></i>
+                @_peep.name
+            </h2>
+            <NavLink style="display: inline-block;" class="small" href="">
+                <p>WTF, That's not me?! <i><img src="./pics/emoji/thinking.svg" height="30" alt="Thinking icon"/></i></p>
+            </NavLink>
+        </div>
+
+        <img src="pics/@_peep.pic" alt="@_peep.name Picture" title="@_peep.name" class="img-fluid mx-auto d-block">
+        
+        @* <EditForm EditContext="@_peepContext" @onsubmit=@VerifyPassword> *@
+        @*      *@
+        @*     <DataAnnotationsValidator /> *@
+        @*     <ValidationSummary /> *@
+        @*      *@
+        @*     <div class="form-group"> *@
+        @*         <label>Password</label> *@
+        @*         <InputText @bind-Value=@_peep.uniquePass class="form-control form-control-lg" /> *@
+        @*         <ValidationMessage For="@(() => _peep.uniquePass)" /> *@
+        @*     </div> *@
+        @*     <input name="user" type="hidden" value="@_peep.ID"> *@
+        @*     <input type="submit" value="SAVE" class="btn btn-success"> *@
+        @*      *@
+        @* </EditForm> *@
+
+        </div>
+    </div>
+
+    <ErrorBanner ErrorMessage="@_errorMessage" />
+    
+</div>  
+
+@code {
+
+    [Parameter]
+    public int UserId { get; set; }
+    
+    private string _errorMessage;
+        private const string Year = "2019";
+
+    private Peeps _peep;
+    EditContext _peepContext;
+    
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        _errorMessage = string.Empty;
+        
+        try
+        {
+            var getPeep = _mediatr.Send(new Core.Queries.FetchPeep.Query
+            {
+                UserID = UserId,
+                Year = Year
+            }).Result;
+
+            if (!getPeep.Success) return;
+            _peep = getPeep.Peep;
+            _peepContext = new EditContext(_peep);
+        } 
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void VerifyPassword(EditContext editContext)
+    {
+        if (!editContext.Validate()) return;
+        if (_peep.picked)
+        {
+            //return redirect
+            _errorMessage = "Yessir";
+            _navigationManager.NavigateTo("GiesYerAddress");
+        }
+        else
+        {
+            _errorMessage = "Wrong password";
+        }
+    }
+}
+ 

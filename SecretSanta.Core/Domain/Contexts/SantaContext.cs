@@ -19,7 +19,8 @@ namespace SecretSanta.Core.Domain.Contexts
 
         public DbSet<Peeps> Peeps { get; set; }
         public DbSet<whopickedwho> WhoPickedWho { get; set; }
-       
+        public DbSet<settings> Settings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Peeps>()

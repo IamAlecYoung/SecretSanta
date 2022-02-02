@@ -7,5 +7,6 @@ namespace SecretSanta.Core.Domain
     {
         public int Person1 { get; set; }
         public int Person2 { get; set; }
+        public string Year { get; set; }
     }
 }

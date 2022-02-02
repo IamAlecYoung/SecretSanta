@@ -1,0 +1,20 @@
+﻿@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="alert alert-danger mt-2 mb-2" role="alert">
+        <h4 class="alert-heading">
+            <i><img src="pics/emoji/exclamation.svg" height="64" alt="Exclamation icon"/></i>
+            <i><img src="pics/emoji/siren.svg" height="64" alt="Siren icon"/></i>
+            Something wasn't right.
+        </h4>
+        <hr>
+        <i></i>
+        <p>@ErrorMessage</p>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public string ErrorMessage { get; set; }
+    
+}

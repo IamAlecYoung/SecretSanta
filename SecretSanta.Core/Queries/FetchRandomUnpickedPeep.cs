@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MediatR;
 using System.Threading.Tasks;
 using SecretSanta.Core.Domain;
@@ -10,11 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SecretSanta.Core.Queries
 {
-    public class FetchWhoPersonPicked
+    public class FetchRandomUnpickedPeep
     {
         public class Query : IRequest<Result>
         {
-            public int PersonId { get; set; }
         }
 
         public class Result
@@ -29,27 +26,30 @@ namespace SecretSanta.Core.Queries
             public Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var result = new Result { Success = false };
+                //$queryDB = $conn->query('SELECT * FROM `peeps` WHERE `picking` = 0 and `year` = (select currentyear from settings) order by rand()');        
 
                 try
                 {
                     using (var db = new Domain.Contexts.SantaContext())
                     {
-                        var recds = 
-                            db.Peeps 
-                                .Where(e 
-                                    => db.WhoPickedWho
-                                        .Where(f => f.Person1 == request.PersonId)
-                                        .Select(s => s.Person2)
-                                        .FirstOrDefault() == e.ID)
-                            .AsNoTracking()
-                            .FirstOrDefault();
+                        // Get the current year
+                        var currentYear = db.Settings
+                            .OrderBy(o => o.ID)
+                            .FirstOrDefault()?
+                            .currentyear;
 
-                        //SELECT * from `peeps` WHERE `ID` = (SELECT Person2 FROM whopickedwho WHERE Person1 = :whoPicked)");
-                        
-                        if (recds != null)
+                        // Find a random result within the current year
+                        var record = db.Peeps
+                            .Where((q => !q.picking 
+                                         && q.Year == currentYear))
+                            .AsNoTracking()
+                            .OrderBy(r => Guid.NewGuid()) // Retrieve a random result
+                            .Take(1);
+
+                        if (record != null)
                         {
                             result.Success = true;
-                            result.picked = recds;
+                            result.picked = record.FirstOrDefault();
                         }
                     }
                 } 
