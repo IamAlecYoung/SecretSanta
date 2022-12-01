@@ -26,27 +26,26 @@ namespace SecretSanta.Core.Queries
 
         public class QueryHandler : IRequestHandler<Query, Result>
         {
+            private Domain.Contexts.SantaContext _db;
+            public QueryHandler(Domain.Contexts.SantaContext db) => _db = db;
             public Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var result = new Result { Success = false };
                 
                 try
                 {
-                    using (var db = new Domain.Contexts.SantaContext())
+                    // Find a random result within the current year
+                    var records = _db.Peeps
+                        .Where((q => q.Year == request.Year))
+                        .AsNoTracking();
+                    
+                    if (records != null)
                     {
-                        // Find a random result within the current year
-                        var records = db.Peeps
-                            .Where((q => q.Year == request.Year))
-                            .AsNoTracking();
+                        if(request.Randomise)
+                            records = records.OrderBy(r => Guid.NewGuid()); // Retrieve a random result
                         
-                        if (records != null)
-                        {
-                            if(request.Randomise)
-                                records = records.OrderBy(r => Guid.NewGuid()); // Retrieve a random result
-                            
-                            result.Success = true;
-                            result.Peeps = records.ToList();
-                        }
+                        result.Success = true;
+                        result.Peeps = records.ToList();
                     }
                 } 
                 catch (Exception ex)

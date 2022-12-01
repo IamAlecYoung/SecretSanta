@@ -12,6 +12,7 @@ namespace SecretSanta.Core.Queries
     {
         public class Query : IRequest<Result>
         {
+            public int PersonPicking { get; set; }
         }
 
         public class Result
@@ -23,6 +24,9 @@ namespace SecretSanta.Core.Queries
 
         public class QueryHandler : IRequestHandler<Query, Result>
         {
+            private Domain.Contexts.SantaContext _db;
+            public QueryHandler(Domain.Contexts.SantaContext db) => _db = db;
+            
             public Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var result = new Result { Success = false };
@@ -30,27 +34,20 @@ namespace SecretSanta.Core.Queries
 
                 try
                 {
-                    using (var db = new Domain.Contexts.SantaContext())
+                    var picker = _db.Peeps.Single(s => s.ID == request.PersonPicking);
+                    
+                    // Find a random result within the same year as the picker
+                    var record = _db.Peeps
+                        .Where((q => !q.picking 
+                                     && q.Year == picker.Year))
+                        .AsNoTracking()
+                        .OrderBy(r => Guid.NewGuid()) // Retrieve a random result
+                        .Take(1);
+
+                    if (record != null)
                     {
-                        // Get the current year
-                        var currentYear = db.Settings
-                            .OrderBy(o => o.ID)
-                            .FirstOrDefault()?
-                            .currentyear;
-
-                        // Find a random result within the current year
-                        var record = db.Peeps
-                            .Where((q => !q.picking 
-                                         && q.Year == currentYear))
-                            .AsNoTracking()
-                            .OrderBy(r => Guid.NewGuid()) // Retrieve a random result
-                            .Take(1);
-
-                        if (record != null)
-                        {
-                            result.Success = true;
-                            result.picked = record.FirstOrDefault();
-                        }
+                        result.Success = true;
+                        result.picked = record.FirstOrDefault();
                     }
                 } 
                 catch (Exception ex)

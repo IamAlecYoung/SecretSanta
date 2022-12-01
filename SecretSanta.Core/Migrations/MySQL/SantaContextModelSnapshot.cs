@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SecretSanta.Core.Domain.Contexts;
 
-namespace SecretSanta.Core.Migrations
+namespace SecretSanta.Core.Migrations.MySQL
 {
     [DbContext(typeof(SantaContext))]
     partial class SantaContextModelSnapshot : ModelSnapshot

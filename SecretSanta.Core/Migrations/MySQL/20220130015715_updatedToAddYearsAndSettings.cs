@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace SecretSanta.Core.Migrations
+namespace SecretSanta.Core.Migrations.MySQL
 {
     public partial class updatedToAddYearsAndSettings : Migration
     {

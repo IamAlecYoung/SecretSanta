@@ -1,0 +1,120 @@
+﻿@page "/Chosen/{UserId:int}"
+@using MediatR
+@* //@using Microsoft.EntityFrameworkCore *@
+@using SecretSanta.Core.Domain
+@* @using SecretSanta.Core.Domain.Contexts *@
+@inject IMediator _mediatr
+@inject NavigationManager _navigationManager
+
+
+<div class="jumbotron pt-4">
+    
+    @if (_peep is not null)
+    {
+        
+        <div class="row">
+            <div class="col-6 offset-3">
+            <div class="justify-content-between">
+                <h2 class="display-4 d-inline-block">
+                    <i><img src="./pics/emoji/grinning.svg" height="64" alt="Grinning icon"/></i>
+                    @_peep.name
+                </h2>
+                <NavLink style="display: inline-block;" class="small" href="">
+                    <p>WTF, That's not me?! <i><img src="./pics/emoji/thinking.svg" height="30" alt="Thinking icon"/></i></p>
+                </NavLink>
+            </div>
+
+            <img src="pics/@_peep.pic" alt="@_peep.name Picture" title="@_peep.name" class="img-fluid mx-auto d-block">
+            
+            <EditForm EditContext="_peepContext" OnSubmit="VerifyPassword">
+            
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            
+                <div class="form-group">
+                    <label>Password</label>
+                    <InputText @bind-Value=@_newPin.uniquePass class="form-control form-control-lg" />
+                    <ValidationMessage For="@(() => _newPin.uniquePass)" />
+                </div>
+                <input name="user" type="hidden" value="@_peep.ID">
+                <input type="submit" value="SAVE" class="btn btn-success">
+            
+            </EditForm>
+
+            </div>
+        </div>
+    }
+    
+    <ErrorBanner ErrorMessage="@_errorMessage" />
+    
+</div>  
+
+@code {
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
+
+    [Parameter]
+    public int UserId { get; set; }
+    
+    private string _errorMessage;
+
+    private Peeps _peep;
+    private Peeps _newPin;
+    EditContext _peepContext;
+    
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        _errorMessage = string.Empty;
+        
+        try
+        {
+            var getPeep = _mediatr.Send(new Core.Queries.FetchPeep.Query
+            {
+                UserID = UserId,
+                Year = AppState.ActiveYear
+            }).Result;
+
+            if (!getPeep.Success) return;
+            _peep = getPeep.Peep;
+            _newPin = new Peeps();
+            _peepContext = new EditContext(_newPin);
+        } 
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void VerifyPassword(EditContext editContext)
+    {
+        if (!editContext.Validate()) return;
+        
+        if (_peep.uniquePass != _newPin.uniquePass)
+        {
+            _errorMessage = "Wrong password";
+        }
+        else
+        {
+            //return redirect
+            _errorMessage = "Yessir";
+            AppState.SetLoggedInUser(_peep.ID);
+            // If they haven't yet picked, pick now.
+            if (_mediatr.Send(new Core.Queries.HasIndividualPickedAlready.Query { PersonPicking = AppState.LoggedInUser }).Result == false)
+            {
+                var getFreshPick = _mediatr.Send(new Core.Queries.FetchRandomUnpickedPeep.Query {PersonPicking = AppState.LoggedInUser}).Result.picked;
+                if (getFreshPick != null)
+                {
+                    var newResult = _mediatr.Send(new Core.Commands.SaveNewPick.Command
+                    {
+                        Picker = AppState.LoggedInUser,
+                        NewPickee = getFreshPick.ID,
+                        Year = AppState.ActiveYear
+                    }).Result;
+                }
+            }
+            _navigationManager.NavigateTo("GiesYerAddress");
+        }
+    }
+}
+ 

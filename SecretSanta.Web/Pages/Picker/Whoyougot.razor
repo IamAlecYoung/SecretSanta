@@ -1,11 +1,11 @@
-﻿@using Microsoft.AspNetCore.Components.Forms
+﻿@page "/WhoYouGot"
+@using Microsoft.AspNetCore.Components.Forms
 @using SecretSanta.Core.Domain
 @using MediatR
 @using System.Reflection
 @inject IMediator _mediatr
 @inject NavigationManager _navigationManager
 
-@page "/WhoYouGot"
 
 <div class="jumbotron pt-4">
     <h2 class="display-4 align-left">
@@ -28,16 +28,16 @@
             
             <hr>
             <div class="d-flex justify-content-between">
-                @* @if (_user.WhatNo == true) *@
-                @* { *@
-                <p> 
+                @if (_user.WhatNo == true)
+                {
+                    <p> 
                         <button class="btn btn-danger" @onclick="Repick">
                         <i><img src="./pics/emoji/nah.svg" height="30" alt="Nah icon"/></i>
                         Fuck that...
                         <br><span class="small">(Pick again)</span>
                         </button>
                     </p>
-                // }
+                }
          
                 <p>
                     <NavLink href="SpinTheWheel" class="btn btn-success">
@@ -62,43 +62,40 @@
     </div>
     
 @code {
-    
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
+
     private Peeps _user;
     private Peeps _whoyoupicked;
-    
-    private int _userID = 12;
-    private string _year = "2019";
     
     protected override void OnInitialized()
     {
         _user = _mediatr.Send(new SecretSanta.Core.Queries.FetchPeep.Query
         {
-            UserID = _userID,
-            Year = _year
+            UserID = AppState.LoggedInUser,
+            Year = AppState.ActiveYear
         }).Result.Peep;
 
         _whoyoupicked = _mediatr.Send(new Core.Queries.FetchWhoPersonPicked.Query
         {
-            PersonId = _userID
+            PersonId = AppState.LoggedInUser
         }).Result.picked;
     }
 
     private async Task Repick()
     {
-        var getFreshPick = _mediatr.Send(new Core.Queries.FetchRandomUnpickedPeep.Query {}).Result.picked;
+        var getFreshPick = _mediatr.Send(new Core.Queries.FetchRandomUnpickedPeep.Query {PersonPicking = AppState.LoggedInUser}).Result.picked;
 
         if (getFreshPick != null)
         {
             await _mediatr.Send(new Core.Commands.SaveNewPick.Command
             {
-                Picker = _userID,
+                Picker = AppState.LoggedInUser,
                 NewPickee = getFreshPick.ID,
-                Year = _year
+                Year = AppState.ActiveYear
             });
         }
-        
         _navigationManager.NavigateTo("SpinTheWheel");
     }
-
 }
     

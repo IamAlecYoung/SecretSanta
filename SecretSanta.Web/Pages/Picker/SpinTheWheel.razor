@@ -1,0 +1,106 @@
+﻿@page "/SpinTheWheel"
+@using Microsoft.AspNetCore.Components.Forms
+@using SecretSanta.Core.Domain
+@using MediatR
+@inject IMediator _mediatr
+@using Microsoft.JSInterop
+@inject IJSRuntime iJSRuntime
+
+<div class="jumbotron pt-4">
+    <h2 class="display-4 align-left">
+        <i><img src="./pics/emoji/thinking.svg" height="64" alt="thinking icon"/></i>
+        <span class="spinwheeltext">Spin the Wheel</span>
+    </h2>
+    <p class="lead">Decided to make it a bit different this year. Instead of being given someone, you now need to SPIN THE WHEEEL!!!!</p>
+    <hr class="my-4">
+    <div class="row">
+        
+        <div class="col-6 offset-3 text-center">
+            <div class="roulette_container mb-1" >
+                <div class="roulette" style="display:none;">
+       
+                    @* $getMaPeeps = $conn->prepare("SELECT * FROM `peeps` WHERE `ID` != :whoPicked and `year` = (select currentyear from settings)" ); *@
+                    
+                    @foreach (var participant in _getallPeeps)
+                    {
+                        <img src="pics/@participant.pic" alt="@participant.name Picture" title="@participant.name" class="img-fluid mx-auto d-block">
+                    }
+                    
+                </div>
+            </div>
+            <div id="soundElement">
+                <audio id="roulettewheelsound">
+                    <source src="sound/wheel_fortune_1.mp3" type="audio/mp3">
+                </audio>
+            </div>
+
+            <h2 class="d-inline-block">
+                <button class="btn btn-success start">
+                    <i><img src="./pics/emoji/hope.svg" height="30" alt="hope icon"/></i>
+                    Spin 
+                </button>
+                <button class="btn btn-success stop" style="display:none" disabled> 
+                    <i><img src="./pics/emoji/omg.svg" height="30" alt="OMG icon"/></i>
+                    Spinning...
+                </button>
+                <div class="finished" style="display:none">
+                    <NavLink href="Whoyougot" class="btn btn-success"> 
+                        <i><img src="./pics/emoji/hope.svg" height="30" alt="hope icon"/></i>
+                        Spun! Click to continue!
+                    </NavLink>
+                </div>
+            </h2>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
+
+    private Peeps _user;
+    private Peeps _whoyoupicked;
+    private List<Peeps> _getallPeeps;
+    private int _selectedPeepNo;
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = _mediatr.Send(new SecretSanta.Core.Queries.FetchPeep.Query
+        {
+            UserID = AppState.LoggedInUser,
+            Year = AppState.ActiveYear
+        }).Result.Peep;
+
+        _whoyoupicked = _mediatr.Send(new Core.Queries.FetchWhoPersonPicked.Query
+        {
+            PersonId = AppState.LoggedInUser
+        }).Result.picked;
+
+        _getallPeeps = _mediatr.Send(new Core.Queries.FetchAllPeeps.Query
+        {
+            Randomise = true,
+            Year = AppState.ActiveYear
+        }).Result.Peeps.Where(e => e.ID != AppState.LoggedInUser).ToList();
+
+        _selectedPeepNo = 0;
+        foreach (var all in _getallPeeps)
+        {
+            if (all.ID == _whoyoupicked?.ID)
+            {
+                break;
+            }
+            _selectedPeepNo++;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await iJSRuntime.InvokeAsync<IJSObjectReference>(
+            "InjectSpinner", _selectedPeepNo);
+        }
+    }
+}
+    

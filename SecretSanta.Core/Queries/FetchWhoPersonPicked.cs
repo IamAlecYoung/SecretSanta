@@ -26,18 +26,19 @@ namespace SecretSanta.Core.Queries
 
         public class QueryHandler : IRequestHandler<Query, Result>
         {
+            private Domain.Contexts.SantaContext _db;
+            public QueryHandler(Domain.Contexts.SantaContext db) => _db = db;
+            
             public Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var result = new Result { Success = false };
 
                 try
                 {
-                    using (var db = new Domain.Contexts.SantaContext())
-                    {
-                        var recds = 
-                            db.Peeps 
+                    var recds = 
+                            _db.Peeps 
                                 .Where(e 
-                                    => db.WhoPickedWho
+                                    => _db.WhoPickedWho
                                         .Where(f => f.Person1 == request.PersonId)
                                         .Select(s => s.Person2)
                                         .FirstOrDefault() == e.ID)
@@ -51,7 +52,6 @@ namespace SecretSanta.Core.Queries
                             result.Success = true;
                             result.picked = recds;
                         }
-                    }
                 } 
                 catch (Exception ex)
                 {

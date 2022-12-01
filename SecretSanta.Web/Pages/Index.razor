@@ -1,12 +1,11 @@
-﻿@using MediatR
+﻿@page "/"
+@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using SecretSanta.Core.Domain
 @using SecretSanta.Core.Domain.Contexts
 @inject IMediator _mediatr
-@inject SantaContext _dbContext;
 @inject NavigationManager NavigationManager
 
-@page "/"
 
 <ErrorBanner ErrorMessage=@ErrorMessage />
 
@@ -35,6 +34,7 @@
                   }
               }
           }
+          
       </div>
   </div>
 
@@ -67,10 +67,11 @@
 </div>
 
 @code {
-    private string ErrorMessage;
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
     
+    private string ErrorMessage;
     private List<Peeps> AllPeeps;
-    private string _year = "2019";
     
     protected override void OnParametersSet()
     {
@@ -81,7 +82,7 @@
         {
             var getPeeps = _mediatr.Send(new Core.Queries.FetchAllPeeps.Query
             {
-                Year = _year
+                Year = AppState.ActiveYear
             }).Result;
 
             if (getPeeps.Success)

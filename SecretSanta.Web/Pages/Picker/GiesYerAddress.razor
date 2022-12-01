@@ -1,9 +1,10 @@
-﻿@using Microsoft.AspNetCore.Components.Forms
+﻿@page "/GiesYerAddress"
+@using Microsoft.AspNetCore.Components.Forms
 @using SecretSanta.Core.Domain
 @using MediatR
+@using Microsoft.AspNetCore.Mvc
 @inject IMediator _mediatr
-
-@page "/GiesYerAddress"
+@inject NavigationManager _navigationManager
 
 <div class="jumbotron pt-4">
     
@@ -35,38 +36,35 @@
             <div class="col-9">                    
                 <p><strong>Your Address</strong></p>
                 
-                <EditForm @ref="@_form" Model="@_user" @onSubmit="SaveAddress">
+                <EditForm @ref="_form" EditContext="_context" OnSubmit="SaveAddress">
                     @* <DataAnnotationsValidator /> *@
                     <ValidationSummary />
                     
                     <div class="form-group">
-                        <label for="user.address1">Address line 1 (inc door number)</label>
-                        <InputText @bind-Value="@_user.address1" class="form-control" />
+                        <label for="addr1">Address line 1 (inc door number)</label>
+                        <InputText @bind-Value="@_user.address1" name="addr1" class="form-control" />
                     </div>
                     <div class="form-group">
-                        <label for="address2">Address line 2</label>
-                        
-                        <InputText @bind-Value="@_user.address1" class="form-control" />
+                        <label for="addr2">Address line 2</label>
+                        <InputText @bind-Value="@_user.address2" name="addr2"  class="form-control" />
                     </div>
                     <div class="form-group">
-                        <label for="address3">Address line 3</label>
-                        <InputText @bind-Value="@_user.address1" class="form-control" />
+                        <label for="addr3">Address line 3</label>
+                        <InputText @bind-Value="@_user.address3" name="addr3"  class="form-control" />
                     </div>
                     <div class="form-group">
                         <label for="postcode">Postcode</label>
-                        <InputText @bind-Value="@_user.address1" class="form-control" />
+                        <InputText @bind-Value="@_user.postcode" name="postcode"  class="form-control" />
                     </div>
                     <div class="form-group">
                         <label for="extra">Anything I need to know (Flat buzzer combo, big dug, no in after 12)</label>
-                        
-                        <InputText @bind-Value="@_user.address1" class="form-control" />
+                        <InputText @bind-Value="@_user.extra" name="extra" class="form-control" />
                     </div>
                     <div class="custom-control custom-checkbox">
-                        <InputText Name="user.creepy" class="custom-control-input" Value="On" />
-                        <label for="user.creepy" class="custom-control-label">I'd like random visits throughout the year</label>
+                        <InputText @bind-Value="@_user.creepy" class="custom-control-input" name="creepy" />
+                        <label for="creepy" class="custom-control-label">I'd like random visits throughout the year</label>
                     </div>
                     <input type="hidden" Value="@_user.ID">
-                    <input type="hidden" Name="@_user.consent" value="Yes" >
                     <input type="submit" value="SAVE" class="btn btn-success">
                 </EditForm>
                 
@@ -92,42 +90,75 @@
             </div>
         </div>
         <p>Alternatively, if you are uncomfortable with that, hit me up and we can arrange something else.</p>
-        @* <form method="post" action="scripts/saveaddress.php">             *@
-        @*     @if (user != null) *@
-        @*     { *@
-        @*          <input type="hidden" name="user" value="@user.ID"> *@
-        @*     } *@
-        @*     <input type="hidden" name="consented" value="Naw" > *@
-        @*     <input type="submit" value="Nah, don't wanna" class="btn btn-info"> *@
-        @* </form> *@
+        <EditForm @ref="_form" Model="_user" OnSubmit="NotWantingToGiveAddress">
+            <ValidationSummary/>
+            <input type="hidden" value="@_user.ID">
+            <input type="submit" value="Nah, don't wanna" class="btn btn-success">
+        </EditForm>
     </div>
+    
+    <ErrorBanner ErrorMessage="@_error" />
 </div>
 
 @code {
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
 
     EditForm _form;
-    private EditContext _context;
     private Peeps _user;
-    private int _userID = 12;
-    private string _year = "2019";
+    private string _error;
+    private EditContext _context;
 
     protected override void OnInitialized()
     {
         _user = _mediatr.Send(new SecretSanta.Core.Queries.FetchPeep.Query
         {
-            UserID = 2,
-            Year = _year
+            UserID = AppState.LoggedInUser,
+            Year = AppState.ActiveYear
         }).Result.Peep;
+        _context = new EditContext(_user);
     }
     
     private async Task SaveAddress()
     {
         var validate = _form.EditContext?.Validate();
-        if (validate == false)
+        if (validate == true)
         {
-            
+            var SaveDetails = _mediatr.Send(new Core.Commands.SaveAddressDetails.Command
+            {
+                PeepID = _user.ID,
+                Address1 = _user.address1,
+                Address2 = _user.address2,
+                Address3 = _user.address3,
+                Postcode = _user.postcode,
+                Extra = _user.extra,
+                Creepy = _user.creepy,
+                Consent = "Yes"
+            }).Result;
+
+            if (SaveDetails == true)
+                _navigationManager.NavigateTo("SpinTheWheel");
+            else
+                _error = "Something wasn't right, try again.";
         }
     }
 
+    private async Task NotWantingToGiveAddress()
+    {
+        var validate = _form.EditContext?.Validate();
+        if (validate == true)
+        {
+            var SaveDetails = _mediatr.Send(new Core.Commands.SaveAddressDetails.Command
+            {
+                PeepID = _user.ID,
+                Consent = "Naw",
+            }).Result;
+
+            if (SaveDetails == true)
+                _navigationManager.NavigateTo("SpinTheWheel");
+            else
+                _error = "Something wasn't right, try again.";
+        }
+    }
 }
     

@@ -17,7 +17,9 @@
         stopCallback : function($stopElm) {
             sfx.pause();
             setTimeout(() => {
-                window.location = "Whoyougot"
+                $('.stop').hide();
+                $('.finished').show();
+                //window.location = "Whoyougot"
             }, 1000);
         }
     }

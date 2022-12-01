@@ -17,15 +17,16 @@ namespace SecretSanta.Core.Commands
 
         public class CommandHander : IRequestHandler<Command, bool>
         {
+            private Domain.Contexts.SantaContext _db;
+            public CommandHander(Domain.Contexts.SantaContext db) => _db = db;
+            
             public Task<bool> Handle(Command request, CancellationToken cancellationToken)
             {
                 var success = false;
                 
                 try
                 {
-                    using (var db = new Domain.Contexts.SantaContext())
-                    {
-                        var record = db.WhoPickedWho
+                    var record = _db.WhoPickedWho
                             .FirstOrDefault(e => e.Person1 == request.Picker
                                                  && e.Year == request.Year);
 
@@ -40,14 +41,13 @@ namespace SecretSanta.Core.Commands
                         // Have to remove the old record as it's part of a composite key
                         if (record != null)
                         {
-                            db.Remove(record);
-                            db.SaveChanges();
+                            _db.Remove(record);
+                            _db.SaveChanges();
                         }
 
-                        db.WhoPickedWho.Add(newPerson);
-                        db.SaveChanges();
+                        _db.WhoPickedWho.Add(newPerson);
+                        _db.SaveChanges();
                         success = true;
-                    }
                 } 
                 catch (Exception ex)
                 {

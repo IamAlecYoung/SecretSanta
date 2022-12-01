@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SecretSanta.Core.Domain.Contexts;
 
-namespace SecretSanta.Core.Migrations
+namespace SecretSanta.Core.Migrations.MySQL
 {
     [DbContext(typeof(SantaContext))]
-    [Migration("20220130014800_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20220130015715_updatedToAddYearsAndSettings")]
+    partial class updatedToAddYearsAndSettings
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,23 +24,47 @@ namespace SecretSanta.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<bool>("BeenPicked")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PictureLocation")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("ToPick")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("UniquePassword")
-                        .HasColumnType("text");
-
                     b.Property<bool>("WhatNo")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Year")
+                        .HasColumnType("text");
+
+                    b.Property<string>("address1")
+                        .HasColumnType("text");
+
+                    b.Property<string>("address2")
+                        .HasColumnType("text");
+
+                    b.Property<string>("address3")
+                        .HasColumnType("text");
+
+                    b.Property<string>("consent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("creepy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("extra")
+                        .HasColumnType("text");
+
+                    b.Property<string>("name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("pic")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("picked")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("picking")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("postcode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("uniquePass")
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
@@ -54,6 +78,9 @@ namespace SecretSanta.Core.Migrations
 
                     b.Property<int>("Person2")
                         .HasColumnType("int");
+
+                    b.Property<string>("Year")
+                        .HasColumnType("text");
 
                     b.HasKey("Person1", "Person2");
 
