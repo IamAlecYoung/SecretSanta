@@ -30,23 +30,26 @@ namespace SecretSanta.Core.Domain.Contexts
                 .HasKey(c => new { c.Person1, c.Person2});
         }
 
-        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        // {
-        //     if(_config == null)
-        //     {
-        //         var StringPath = string.Empty;
-        //         #if DEBUG
-        //             StringPath = ".Web";
-        //         #endif
-        //         
-        //         _config 
-        //             = new ConfigurationBuilder()
-        //                 .SetBasePath(Directory.GetCurrentDirectory())
-        //                 .AddJsonFile(@Directory.GetCurrentDirectory() + $"/../SecretSanta{StringPath}/appsettings.json")
-        //                 .Build();
-        //     }
-        //     if(_config != null)
-        //         optionsBuilder.UseMySQL(_config.GetConnectionString("SantaContext"));
-        // }
+//         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//         {
+//             if (_config == null)
+//             {
+//                 var StringPath = string.Empty;
+//                 var environment = "appsettings.json";
+// #if DEBUG
+//                 StringPath = ".Web";
+//                 environment = "appsettings.Development.json";
+// #endif
+//
+//                 _config
+//                     = new ConfigurationBuilder()
+//                         .SetBasePath(Directory.GetCurrentDirectory())
+//                         .AddJsonFile(@Directory.GetCurrentDirectory() + $"/../SecretSanta{StringPath}/{environment}")
+//                         .Build();
+//             }
+//             if (_config != null)
+//                 //optionsBuilder.UseMySQL(_config.GetConnectionString("SantaContext"));
+//                 optionsBuilder.UseSqlServer(_config.GetConnectionString("SantaContext"));
+//         }
     }
 }

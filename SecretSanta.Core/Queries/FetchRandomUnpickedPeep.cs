@@ -35,19 +35,30 @@ namespace SecretSanta.Core.Queries
                 try
                 {
                     var picker = _db.Peeps.Single(s => s.ID == request.PersonPicking);
-                    
+
                     // Find a random result within the same year as the picker
                     var record = _db.Peeps
-                        .Where((q => !q.picking 
-                                     && q.Year == picker.Year))
+                        .Where((q => !q.BeenPicked && q.Year == picker.Year))
                         .AsNoTracking()
                         .OrderBy(r => Guid.NewGuid()) // Retrieve a random result
-                        .Take(1);
+                        ;//.Take(1);
 
                     if (record != null)
                     {
-                        result.Success = true;
-                        result.picked = record.FirstOrDefault();
+                        // If there is only one result left and it is the picker, just return.
+                        if(record.Count() == 1 && record.First().ID == request.PersonPicking)
+                        {
+                            result.Success = true;
+                            result.picked = record.FirstOrDefault();
+                        }
+                        else
+                        {
+                            // Refetch records without themselves in it.
+                            record = record.Where(w => w.ID != request.PersonPicking).OrderBy(o => Guid.NewGuid());
+
+                            result.Success = true;
+                            result.picked = record.FirstOrDefault();
+                        }
                     }
                 } 
                 catch (Exception ex)

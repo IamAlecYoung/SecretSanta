@@ -71,7 +71,7 @@ namespace SecretSanta.Web
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            #if Release
+            #if !DEBUG
             // Base directory
             app.UsePathBase("/SecretSanta");
             app.Use((context, next) =>

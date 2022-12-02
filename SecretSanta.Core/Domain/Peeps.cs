@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SecretSanta.Core.Domain
 {
@@ -10,8 +11,8 @@ namespace SecretSanta.Core.Domain
         public string name { get; set; }
         public string pic { get; set; }
         
-        public bool picking { get; set; }
-        public bool picked { get; set; }
+        public bool ToPick { get; set; }
+        public bool BeenPicked { get; set; }
         public string uniquePass { get; set; }
         
         public bool WhatNo { get; set; }

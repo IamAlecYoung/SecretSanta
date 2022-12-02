@@ -33,7 +33,7 @@ namespace SecretSanta.Core.Queries
 
                     if (record != null)
                     {
-                        result = record.picking;
+                        result = record.ToPick;
                     }
                 } 
                 catch (Exception ex)

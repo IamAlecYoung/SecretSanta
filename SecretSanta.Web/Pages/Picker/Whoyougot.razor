@@ -92,7 +92,8 @@
             {
                 Picker = AppState.LoggedInUser,
                 NewPickee = getFreshPick.ID,
-                Year = AppState.ActiveYear
+                Year = AppState.ActiveYear,
+                PickedAlready = true
             });
         }
         _navigationManager.NavigateTo("SpinTheWheel");

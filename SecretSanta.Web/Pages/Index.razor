@@ -3,6 +3,7 @@
 @using Microsoft.EntityFrameworkCore
 @using SecretSanta.Core.Domain
 @using SecretSanta.Core.Domain.Contexts
+@inject Core.Domain.Contexts.SantaContext _db
 @inject IMediator _mediatr
 @inject NavigationManager NavigationManager
 
@@ -21,7 +22,7 @@
           @{
               if (AllPeeps != null)
               {
-                  foreach (var ToPick in AllPeeps.Where(e => !e.picking))
+                  foreach (var ToPick in AllPeeps.Where(e => !e.ToPick))
                   {
                       <div class="col-sm-6 col-md-4 col-lg-2">
                           @{
@@ -50,7 +51,7 @@
             @{
                 if (AllPeeps != null)
                 {
-                    foreach (var ToPick in AllPeeps.Where(e => e.picking))
+                    foreach (var ToPick in AllPeeps.Where(e => e.ToPick))
                     {
                         <div class="col-sm-6 col-md-4 col-lg-2">
                             @{
@@ -77,6 +78,16 @@
     {
         base.OnParametersSet();
         ErrorMessage = string.Empty;
+
+        // Try connect to db
+        try
+        {
+            _db.Peeps.Any();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
         
         try
         {
@@ -88,6 +99,10 @@
             if (getPeeps.Success)
             {
                 AllPeeps = getPeeps.Peeps;
+            }
+            else
+            {
+                ErrorMessage = getPeeps.Exception;
             }
         } 
         catch (Exception ex)

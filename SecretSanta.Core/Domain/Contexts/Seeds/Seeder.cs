@@ -14,7 +14,8 @@ public class Seeder
             name = s.Name,
             uniquePass = Services.Password.Generate(),
             pic = Services.ImageConversion.ToBase64(s.Picture),
-            Year = "2022"
+            Year = "2022",
+            WhatNo = true
         }).ToList();
     }
 
