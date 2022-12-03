@@ -42,7 +42,15 @@ namespace SecretSanta.Core.Commands
                     // Have to remove the old record as it's part of a composite key
                     if (record != null)
                     {
+                        var previousPersonPicked = record.Person2;
+                        
+                        // Remove picked record
                         _db.Remove(record);
+                        _db.SaveChanges();
+
+                        // Reallow person to be picked by others
+                        var previousPerson = _db.Peeps.Single(s => s.ID == previousPersonPicked);
+                        previousPerson.BeenPicked = false;
                         _db.SaveChanges();
                     }
 
