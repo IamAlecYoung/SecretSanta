@@ -131,16 +131,7 @@ namespace SecretSanta.Core.Migrations.MSSQL
                 nullable: false,
                 oldClrType: typeof(byte),
                 oldType: "tinyint(1)");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "ID",
-                table: "Peeps",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .Annotation("SqlServer:Identity", "1, 1");
-
+            
             migrationBuilder.AddColumn<bool>(
                 name: "BeenPicked",
                 table: "Peeps",
@@ -154,20 +145,6 @@ namespace SecretSanta.Core.Migrations.MSSQL
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
-
-            migrationBuilder.CreateTable(
-                name: "Settings",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    currentyear = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    admin = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Settings", x => x.ID);
-                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -291,36 +268,19 @@ namespace SecretSanta.Core.Migrations.MSSQL
                 oldType: "nvarchar(max)",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<byte>(
-                name: "WhatNo",
-                table: "Peeps",
-                type: "tinyint(1)",
-                nullable: false,
-                oldClrType: typeof(bool),
-                oldType: "bit");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "ID",
-                table: "Peeps",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .OldAnnotation("SqlServer:Identity", "1, 1");
-
-            migrationBuilder.AddColumn<byte>(
-                name: "picked",
-                table: "Peeps",
-                type: "tinyint(1)",
-                nullable: false,
-                defaultValue: (byte)0);
-
-            migrationBuilder.AddColumn<byte>(
-                name: "picking",
-                table: "Peeps",
-                type: "tinyint(1)",
-                nullable: false,
-                defaultValue: (byte)0);
+            // migrationBuilder.AddColumn<byte>(
+            //     name: "picked",
+            //     table: "Peeps",
+            //     type: "tinyint(1)",
+            //     nullable: false,
+            //     defaultValue: (byte)0);
+            //
+            // migrationBuilder.AddColumn<byte>(
+            //     name: "picking",
+            //     table: "Peeps",
+            //     type: "tinyint(1)",
+            //     nullable: false,
+            //     defaultValue: (byte)0);
         }
     }
 }

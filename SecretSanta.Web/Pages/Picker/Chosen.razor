@@ -2,6 +2,7 @@
 @using MediatR
 @* //@using Microsoft.EntityFrameworkCore *@
 @using SecretSanta.Core.Domain
+@* @using SecretSanta.Core.Migrations.MySQL *@
 @* @using SecretSanta.Core.Domain.Contexts *@
 @inject IMediator _mediatr
 @inject NavigationManager _navigationManager
@@ -96,8 +97,7 @@
         }
         else
         {
-            //return redirect
-            _errorMessage = "Yessir";
+            var redirect = true;
             AppState.SetLoggedInUser(_peep.ID);
             // If they haven't yet picked, pick now.
             if (_mediatr.Send(new Core.Queries.HasIndividualPickedAlready.Query { PersonPicking = AppState.LoggedInUser }).Result == false)
@@ -111,9 +111,16 @@
                         NewPickee = getFreshPick.ID,
                         Year = AppState.ActiveYear
                     }).Result;
+
+                    if (newResult == false)
+                    {
+                        _errorMessage = "There was a problem, please try again.";
+                        redirect = newResult;
+                    }
                 }
             }
-            _navigationManager.NavigateTo("GiesYerAddress");
+            if(redirect)
+                _navigationManager.NavigateTo("GiesYerAddress");
         }
     }
 }

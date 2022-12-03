@@ -96,10 +96,11 @@ namespace SecretSanta.Web
         private void SeedTheDatabase(ServiceProvider service)
         {
             var db = service.GetRequiredService<Core.Domain.Contexts.SantaContext>();
-            db.Database.EnsureCreated(); // Ensure the database is created.
 
             try
             {
+                db.Database.Migrate(); // Ensure the database is created.
+    
                 // Seed the database with test data.
                 if (db.Peeps.Any() == false)
                 {
