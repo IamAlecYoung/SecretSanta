@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MediatR;
 using System.Threading.Tasks;
 using SecretSanta.Core.Domain;
@@ -10,18 +8,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SecretSanta.Core.Queries
 {
-    public class FetchWhoPersonPicked
+    public class FetchPeep
     {
         public class Query : IRequest<Result>
         {
-            public int PersonId { get; set; }
+            public int UserID { get; set; }
+            public string Year { get; set; }
         }
 
         public class Result
         {
             public bool Success { get; set; }
             public string Exception { get; set; }
-            public Peeps picked { get; set; }
+            public Peeps Peep { get; set; }
         }
 
         public class QueryHandler : IRequestHandler<Query, Result>
@@ -32,26 +31,21 @@ namespace SecretSanta.Core.Queries
             public Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var result = new Result { Success = false };
-
+                
                 try
                 {
-                    var recds = 
-                            _db.Peeps 
-                                .Where(e 
-                                    => _db.WhoPickedWho
-                                        .Where(f => f.Person1 == request.PersonId)
-                                        .Select(s => s.Person2)
-                                        .FirstOrDefault() == e.ID)
-                            .AsNoTracking()
-                            .FirstOrDefault();
-
-                        //SELECT * from `peeps` WHERE `ID` = (SELECT Person2 FROM whopickedwho WHERE Person1 = :whoPicked)");
-                        
-                        if (recds != null)
-                        {
-                            result.Success = true;
-                            result.picked = recds;
-                        }
+                    // Find a random result within the current year
+                    var record = _db.Peeps
+                        .Where((q => q.ID == request.UserID
+                            && q.Year == request.Year))
+                        .AsNoTracking()
+                        .FirstOrDefault();
+                    
+                    if (record != null)
+                    {
+                        result.Success = true;
+                        result.Peep = record;
+                    }
                 } 
                 catch (Exception ex)
                 {

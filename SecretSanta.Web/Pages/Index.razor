@@ -1,75 +1,114 @@
-﻿@using MediatR
+﻿@page "/"
+@using MediatR
 @using Microsoft.EntityFrameworkCore
 @using SecretSanta.Core.Domain
 @using SecretSanta.Core.Domain.Contexts
+@inject Core.Domain.Contexts.SantaContext _db
 @inject IMediator _mediatr
-@inject SantaContext _dbContext;
+@inject NavigationManager NavigationManager
 
-@page "/"
 
-<h1>Hello, world!</h1>
+<ErrorBanner ErrorMessage=@ErrorMessage />
 
-Test Github actions change to restart service after a successful deploy
+  <div class="jumbotron pt-4">
+      <h2 class="display-4 align-left">
+      <i><img src="pics/emoji/grinning.svg" height="64" alt="Grinning icon"/></i>
+       Still to pick someone 
+      </h2>
+      <p class="lead">If you still need to pick someone, click your picture below</p>
+      <hr class="my-4">
+      <div class="row">
+      
+          @{
+              if (AllPeeps != null)
+              {
+                  foreach (var ToPick in AllPeeps.Where(e => !e.ToPick))
+                  {
+                      <div class="col-sm-6 col-md-4 col-lg-2">
+                          @{
+                              var navLink = $"Chosen/{ToPick.ID}";
+                              <NavLink href=@navLink>
+                                  <img src="@ToPick.pic" alt="@ToPick.name Picture" title="@ToPick.name" class="img-fluid">
+                              </NavLink>
+                          }
+                      </div>
+                  }
+              }
+          }
+          
+      </div>
+  </div>
 
-<p>SQL success: @SQLSuccess</p>
-<p>@SQLException</p>
 
-<div style="border-left: 3px solid green; padding-left: 10px;">
-    @if(peep != null)
-    {
-        <p>Mediatr</p>
-        <p>Pickee: @peep.Person1</p>
-        <p>Picker: @peep.Person2</p>
-    }
-</div>
-
-<div style="border-left: 3px solid blue; padding-left: 10px;">
-    @if(WhoPicked != null)
-    {
-        <p>Straight DB</p>
-        <p>Pickee: @WhoPicked.Person1</p>
-        <p>Picker: @WhoPicked.Person2</p>
-    }
+  <div class="jumbotron pt-4">
+      <h2 class="display-4 align-left">
+      <i><img src="./pics/emoji/looky.svg" height="64" alt="Eyes icon"/></i>
+      Cant remember who you picked? 
+      </h2>
+      <p class="lead">If you still need a wee reminder, click your picture below</p>
+      <hr class="my-4">
+      <div class="row">
+            @{
+                if (AllPeeps != null)
+                {
+                    foreach (var ToPick in AllPeeps.Where(e => e.ToPick))
+                    {
+                        <div class="col-sm-6 col-md-4 col-lg-2">
+                            @{
+                                var navLink = $"Chosen/{ToPick.ID}";
+                                <NavLink href=@navLink>
+                                    <img src="@ToPick.pic" alt="@ToPick.name Picture" title="@ToPick.name" class="img-fluid">
+                                </NavLink>
+                            }
+                        </div>
+                    }
+                }
+            }
+      </div>
 </div>
 
 @code {
-    private whopickedwho peep;
-    private bool SQLSuccess = true;
-    private string SQLException;
-    private whopickedwho WhoPicked;
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
+    
+    private string ErrorMessage;
+    private List<Peeps> AllPeeps;
     
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+        ErrorMessage = string.Empty;
 
+        // Try connect to db
         try
         {
-            //using (var db = new Core.Domain.Contexts.SantaContext())
-            // using (var db = new _dbContext)
-            // {
-                _dbContext.Database.CanConnect();
-                
-                WhoPicked = _dbContext.WhoPickedWho
-                    .Where(q => q.Person1 == 12)
-                    .AsNoTracking()
-                    .FirstOrDefault();
-            // }
+            _db.Peeps.Any();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        
+        try
+        {
+            var getPeeps = _mediatr.Send(new Core.Queries.FetchAllPeeps.Query
+            {
+                Year = AppState.ActiveYear
+            }).Result;
+
+            if (getPeeps.Success)
+            {
+                AllPeeps = getPeeps.Peeps;
+            }
+            else
+            {
+                ErrorMessage = getPeeps.Exception;
+            }
         } 
         catch (Exception ex)
         {
             var except = ex.Message;
-            SQLSuccess = false;
-            SQLException = ex.Message;
-        }
-
-
-        var thingy = _mediatr.Send(new Core.Queries.FetchWhoPersonPicked.Query {
-            PersonId = 12
-        }).Result;
-
-        if(thingy.Success)
-        {
-            peep = thingy.picked;
+            ErrorMessage = ex.Message;
         }
     }
 }

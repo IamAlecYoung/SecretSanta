@@ -1,0 +1,164 @@
+﻿@page "/GiesYerAddress"
+@using Microsoft.AspNetCore.Components.Forms
+@using SecretSanta.Core.Domain
+@using MediatR
+@using Microsoft.AspNetCore.Mvc
+@inject IMediator _mediatr
+@inject NavigationManager _navigationManager
+
+<div class="jumbotron pt-4">
+    
+    <h2 class="display-4 align-left">
+        <i><img src="./pics/emoji/thinking.svg" height="64" alt="thinking icon"/></i>
+        Gonnae gie's yer address
+    </h2>
+    
+    <p class="lead">I know what you're thinking, What's that Creepy Bastard wanting ma address fur?</p>
+    <hr class="my-4">
+    <br>
+    
+    <div class="whatNowBlock">
+        <h2 style="text-align: left;"> I know, I know. </h2>
+        <p> Due to the situation this year, we're gonna have to play things different this year. </p>
+        <p> Since we cannae be together in person (breaking a decade long tradition), we need to think ootside the boax </p>
+        <p></p>
+        <p>So here's my thinking.</p>
+        <p>You try ship your presents to ME, I ship presents back to YOU! Fun times!</p>
+        <p>So if you want to give me a suitable address below, I can arrange with Santa's little helpers to get you a happy Seshmas.</p>
+        <p></p>
+        <hr>
+        <div class="row shadow-sm p-3 mb-5 bg-white rounded">
+            <div class="col-12">
+                <h2>Address time</h2>
+                <p>Don't worry, despite outward appearances, I do take Data Protection seriously, addresses are stored responsibly and will be deleted after Xmas is done</p>
+                <hr>
+            </div>
+            <div class="col-9">                    
+                <p><strong>Your Address</strong></p>
+                
+                <EditForm @ref="_form" EditContext="_context" OnSubmit="SaveAddress">
+                    @* <DataAnnotationsValidator /> *@
+                    <ValidationSummary />
+                    
+                    <div class="form-group">
+                        <label for="addr1">Address line 1 (inc door number)</label>
+                        <InputText @bind-Value="@_user.address1" name="addr1" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="addr2">Address line 2</label>
+                        <InputText @bind-Value="@_user.address2" name="addr2"  class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="addr3">Address line 3</label>
+                        <InputText @bind-Value="@_user.address3" name="addr3"  class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="postcode">Postcode</label>
+                        <InputText @bind-Value="@_user.postcode" name="postcode"  class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="extra">Anything I need to know (Flat buzzer combo, big dug, no in after 12)</label>
+                        <InputText @bind-Value="@_user.extra" name="extra" class="form-control" />
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <InputText @bind-Value="@_user.creepy" class="custom-control-input" name="creepy" />
+                        <label for="creepy" class="custom-control-label">I'd like random visits throughout the year</label>
+                    </div>
+                    <input type="hidden" Value="@_user.ID">
+                    <input type="submit" value="SAVE" class="btn btn-success">
+                </EditForm>
+                
+            </div>
+            <div class="col-3">
+                <p><strong>Alec Address (--------)</strong></p>
+                <p>
+                    -----,<br>
+                    -----y,<br>
+                    -----,<br>
+                    --- ---<br>
+                </p>
+                <hr>
+                <p><strong>G's Address (---------)</strong></p>
+                <p>
+                    -----,<br>
+                    -----,<br>
+                    -----,<br>
+                    --- ---<br>
+                </p>
+                <hr>
+                <p class="muted"><i>(Make a note)</i></p>
+            </div>
+        </div>
+        <p>Alternatively, if you are uncomfortable with that, hit me up and we can arrange something else.</p>
+        <EditForm @ref="_form" Model="_user" OnSubmit="NotWantingToGiveAddress">
+            <ValidationSummary/>
+            <input type="hidden" value="@_user.ID">
+            <input type="submit" value="Nah, don't wanna" class="btn btn-success">
+        </EditForm>
+    </div>
+    
+    <ErrorBanner ErrorMessage="@_error" />
+</div>
+
+@code {
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
+
+    EditForm _form;
+    private Peeps _user;
+    private string _error;
+    private EditContext _context;
+
+    protected override void OnInitialized()
+    {
+        _user = _mediatr.Send(new SecretSanta.Core.Queries.FetchPeep.Query
+        {
+            UserID = AppState.LoggedInUser,
+            Year = AppState.ActiveYear
+        }).Result.Peep;
+        _context = new EditContext(_user);
+    }
+    
+    private async Task SaveAddress()
+    {
+        var validate = _form.EditContext?.Validate();
+        if (validate == true)
+        {
+            var SaveDetails = _mediatr.Send(new Core.Commands.SaveAddressDetails.Command
+            {
+                PeepID = _user.ID,
+                Address1 = _user.address1,
+                Address2 = _user.address2,
+                Address3 = _user.address3,
+                Postcode = _user.postcode,
+                Extra = _user.extra,
+                Creepy = _user.creepy,
+                Consent = "Yes"
+            }).Result;
+
+            if (SaveDetails == true)
+                _navigationManager.NavigateTo("SpinTheWheel");
+            else
+                _error = "Something wasn't right, try again.";
+        }
+    }
+
+    private async Task NotWantingToGiveAddress()
+    {
+        var validate = _form.EditContext?.Validate();
+        if (validate == true)
+        {
+            var SaveDetails = _mediatr.Send(new Core.Commands.SaveAddressDetails.Command
+            {
+                PeepID = _user.ID,
+                Consent = "Naw",
+            }).Result;
+
+            if (SaveDetails == true)
+                _navigationManager.NavigateTo("SpinTheWheel");
+            else
+                _error = "Something wasn't right, try again.";
+        }
+    }
+}
+    

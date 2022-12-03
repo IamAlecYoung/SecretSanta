@@ -1,0 +1,102 @@
+﻿@page "/WhoYouGot"
+@using Microsoft.AspNetCore.Components.Forms
+@using SecretSanta.Core.Domain
+@using MediatR
+@using System.Reflection
+@inject IMediator _mediatr
+@inject NavigationManager _navigationManager
+
+
+<div class="jumbotron pt-4">
+    <h2 class="display-4 align-left">
+    <i><img src="./pics/emoji/thinking.svg" height="64" alt="thinking icon"/></i>
+    Who You got
+    </h2>
+    <hr class="my-4">
+
+        @if (_whoyoupicked != null)
+        {
+            <div class="row">
+                <div class="col-6 offset-3 text-center">
+                    <img src="@_whoyoupicked.pic" alt="@_whoyoupicked.name Picture" title="@_whoyoupicked.name" class="img-fluid mx-auto d-block">
+                    <h2 class="d-inline-block">
+                        <i><img src="./pics/emoji/omg.svg" height="64" alt="OMG icon"/></i>
+                        @_whoyoupicked.name
+                    </h2>
+                </div>
+            </div>
+            
+            <hr>
+            <div class="d-flex justify-content-between">
+                @if (_user.WhatNo == true)
+                {
+                    <p> 
+                        <button class="btn btn-danger" @onclick="Repick">
+                        <i><img src="./pics/emoji/nah.svg" height="30" alt="Nah icon"/></i>
+                        Fuck that...
+                        <br><span class="small">(Pick again)</span>
+                        </button>
+                    </p>
+                }
+         
+                <p>
+                    <NavLink href="SpinTheWheel" class="btn btn-success">
+                        <i><img src="./pics/emoji/omg.svg" height="30" alt="omg icon"/></i>
+                        I just wanna see the spinny wheel again
+                        <br><span class="small">(wont change result)</span>
+                    </NavLink>
+                </p>
+            </div>
+        }
+
+    <hr>
+        <br>
+        <div class="whatNowBlock">
+        <h2 style="text-align: left;"> What now? </h2>
+        <p> That's it, end of the rabbit hole, that's all Alice found through the looking glass... </p>
+        <p> I don't know any price limit, I just wanted to fuck about making this little thing to make Secret Santa easier to pick.</p>
+        <p> Price limit is normally around &#163;5 - &#163;10 but spend as much or as little as you want</p>
+        <br>
+        <p> Oh, and to the person that got me. I swear it isn't rigged... but just incase, here's my <a href="http://y2u.be/dQw4w9WgXcQ" taget="_blank">Amazon Wishlist</a> Hint hint</p>
+        </div>
+    </div>
+    
+@code {
+    [CascadingParameter]
+    public State.CascadingAppState AppState { get; set; }
+
+    private Peeps _user;
+    private Peeps _whoyoupicked;
+    
+    protected override void OnInitialized()
+    {
+        _user = _mediatr.Send(new SecretSanta.Core.Queries.FetchPeep.Query
+        {
+            UserID = AppState.LoggedInUser,
+            Year = AppState.ActiveYear
+        }).Result.Peep;
+
+        _whoyoupicked = _mediatr.Send(new Core.Queries.FetchWhoPersonPicked.Query
+        {
+            PersonId = AppState.LoggedInUser
+        }).Result.picked;
+    }
+
+    private async Task Repick()
+    {
+        var getFreshPick = _mediatr.Send(new Core.Queries.FetchRandomUnpickedPeep.Query {PersonPicking = AppState.LoggedInUser}).Result.picked;
+
+        if (getFreshPick != null)
+        {
+            await _mediatr.Send(new Core.Commands.SaveNewPick.Command
+            {
+                Picker = AppState.LoggedInUser,
+                NewPickee = getFreshPick.ID,
+                Year = AppState.ActiveYear,
+                PickedAlready = true
+            });
+        }
+        _navigationManager.NavigateTo("SpinTheWheel");
+    }
+}
+    

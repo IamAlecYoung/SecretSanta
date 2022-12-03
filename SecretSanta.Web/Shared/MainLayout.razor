@@ -1,17 +1,33 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
     <div class="main">
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
 
-        <div class="content px-4">
-            @Body
+        <div class="container">
+  
+            <h1 class="display-4"> 
+                <i><img src="pics/emoji/santa.svg" height="64" alt="Mr Santa icon"/></i>
+                <i><img src="pics/emoji/present.svg" height="64" alt="Present icon"/></i>
+                <i><img src="pics/emoji/tree.svg" height="64" alt="Tree icon"/></i>
+                Seshmas at <strike>the Clansman</strike> home 
+                (<i><img src="pics/emoji/cry.svg" height="64" alt="Cry icon"/></i>)
+            </h1>
+
+              <div class="content px-4">
+                  @Body
+              </div>
+        
+              <footer class="footer mt-auto py-3">
+                  <div class="container">
+                      <div class="d-flex justify-content-between">
+                          <span class="text-muted">Seshmas site</span>
+                          <span class="text-muted">
+                              <NavLink href="Usage">Usage</NavLink>
+                          </span>
+                      </div>
+                  </div>
+              </footer>
         </div>
     </div>
 </div>
